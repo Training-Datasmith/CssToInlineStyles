@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TijsVerkoyen\CssToInlineStyles\Css;
 
 use TijsVerkoyen\CssToInlineStyles\Css\Rule\Processor as RuleProcessor;

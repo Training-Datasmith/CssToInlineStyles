@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TijsVerkoyen\CssToInlineStyles\Tests\Css\Property;
 
-use TijsVerkoyen\CssToInlineStyles\Css\Property\Property;
 use PHPUnit\Framework\TestCase;
+use TijsVerkoyen\CssToInlineStyles\Css\Property\Property;
 
 class PropertyTest extends TestCase
 {

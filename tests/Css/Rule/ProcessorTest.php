@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TijsVerkoyen\CssToInlineStyles\Tests\Css\Rule;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\CssSelector\Node\Specificity;
 use TijsVerkoyen\CssToInlineStyles\Css\Rule\Processor;
-use PHPUnit\Framework\TestCase;
 
 class ProcessorTest extends TestCase
 {

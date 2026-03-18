@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TijsVerkoyen\CssToInlineStyles\Tests\Css;
 
-use TijsVerkoyen\CssToInlineStyles\Css\Processor;
 use PHPUnit\Framework\TestCase;
+use TijsVerkoyen\CssToInlineStyles\Css\Processor;
 
 class ProcessorTest extends TestCase
 {

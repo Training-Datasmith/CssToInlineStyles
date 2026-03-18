@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TijsVerkoyen\CssToInlineStyles\Css\Property;
 
 use Symfony\Component\CssSelector\Node\Specificity;

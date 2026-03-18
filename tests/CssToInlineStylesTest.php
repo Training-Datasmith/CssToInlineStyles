@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace TijsVerkoyen\CssToInlineStyles\Tests;
 
+use PHPUnit\Framework\TestCase;
 use TijsVerkoyen\CssToInlineStyles\Css\Property\Property;
 use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
-use PHPUnit\Framework\TestCase;
 
 class CssToInlineStylesTest extends TestCase
 {
@@ -38,7 +40,7 @@ class CssToInlineStylesTest extends TestCase
         $element = $document->createElement('a', 'foo');
         $inlineElement = $this->cssToInlineStyles->inlineCssOnElement(
             $element,
-            array()
+            []
         );
 
         $document->appendChild($inlineElement);
@@ -55,9 +57,9 @@ class CssToInlineStylesTest extends TestCase
         $element = $document->createElement('a', 'foo');
         $inlineElement = $this->cssToInlineStyles->inlineCssOnElement(
             $element,
-            array(
+            [
                 new Property('padding', '5px'),
-            )
+            ]
         );
 
         $document->appendChild($inlineElement);
@@ -75,10 +77,10 @@ class CssToInlineStylesTest extends TestCase
         $element->setAttribute('style', 'color: green; border: 1px;');
         $inlineElement = $this->cssToInlineStyles->inlineCssOnElement(
             $element,
-            array(
+            [
                 new Property('border-bottom', '5px'),
                 new Property('border', '2px'),
-            )
+            ]
         );
 
         $document->appendChild($inlineElement);
@@ -224,7 +226,7 @@ EOF;
 
     public function testInvalidSelector(): void
     {
-        $html = "<p></p>";
+        $html = '<p></p>';
         $css = ' p&@*$%& { display: inline; }';
         $expected = $html;
 
@@ -316,7 +318,7 @@ EOF;
 
     private function getBodyContent(string $html): ?string
     {
-        $matches = array();
+        $matches = [];
         preg_match('|<body>(.*)</body>|ims', $html, $matches);
 
         if (!isset($matches[1])) {
