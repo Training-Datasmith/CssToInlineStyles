@@ -14,30 +14,27 @@ class Processor
      *
      * @return string[]
      */
-    public function splitIntoSeparateRules($rulesString)
+    public function splitIntoSeparateRules($rulesString): array
     {
         $rulesString = $this->cleanup($rulesString);
 
-        return (array) explode('}', $rulesString);
+        return explode('}', $rulesString);
     }
 
     /**
      * @param string $string
-     *
-     * @return string
      */
-    private function cleanup($string)
+    private function cleanup($string): string
     {
-        $string = str_replace(array("\r", "\n"), '', $string);
-        $string = str_replace(array("\t"), ' ', $string);
+        $string = str_replace(["\r", "\n"], '', $string);
+        $string = str_replace(["\t"], ' ', $string);
         $string = str_replace('"', '\'', $string);
         $string = preg_replace('|/\*.*?\*/|', '', $string) ?? $string;
         $string = preg_replace('/\s\s+/', ' ', $string) ?? $string;
 
         $string = trim($string);
-        $string = rtrim($string, '}');
 
-        return $string;
+        return rtrim($string, '}');
     }
 
     /**
@@ -48,17 +45,17 @@ class Processor
      *
      * @return Rule[]
      */
-    public function convertToObjects($rule, $originalOrder)
+    public function convertToObjects($rule, $originalOrder): array
     {
         $rule = $this->cleanup($rule);
 
         $chunks = explode('{', $rule);
         if (!isset($chunks[1])) {
-            return array();
+            return [];
         }
         $propertiesProcessor = new PropertyProcessor();
-        $rules = array();
-        $selectors = (array) explode(',', trim($chunks[0]));
+        $rules = [];
+        $selectors = explode(',', trim($chunks[0]));
         $properties = $propertiesProcessor->splitIntoSeparateProperties($chunks[1]);
 
         foreach ($selectors as $selector) {
@@ -134,7 +131,7 @@ class Processor
      *
      * @return Rule[]
      */
-    public function convertArrayToObjects(array $rules, array $objects = array())
+    public function convertArrayToObjects(array $rules, array $objects = [])
     {
         $order = 1;
         foreach ($rules as $rule) {
@@ -161,7 +158,7 @@ class Processor
 
         // if the specificity is the same, use the order in which the element appeared
         if ($value === 0) {
-            $value = $e1->getOrder() - $e2->getOrder();
+            return $e1->getOrder() - $e2->getOrder();
         }
 
         return $value;

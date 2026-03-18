@@ -15,7 +15,7 @@ final class Rule
     /**
      * @var Property[]
      */
-    private $properties;
+    private array $properties;
 
     /**
      * @var Specificity
@@ -32,7 +32,6 @@ final class Rule
      *
      * @param string      $selector
      * @param Property[]  $properties
-     * @param Specificity $specificity
      * @param int         $order
      */
     public function __construct($selector, array $properties, Specificity $specificity, $order)

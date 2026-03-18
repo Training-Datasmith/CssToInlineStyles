@@ -13,12 +13,12 @@ class Processor
      *
      * @return string[]
      */
-    public function splitIntoSeparateProperties($propertiesString)
+    public function splitIntoSeparateProperties($propertiesString): array
     {
         $propertiesString = $this->cleanup($propertiesString);
 
-        $properties = (array) explode(';', $propertiesString);
-        $keysToRemove = array();
+        $properties = explode(';', $propertiesString);
+        $keysToRemove = [];
         $numberOfProperties = count($properties);
 
         for ($i = 0; $i < $numberOfProperties; $i++) {
@@ -31,10 +31,8 @@ class Processor
             }
         }
 
-        if (!empty($keysToRemove)) {
-            foreach ($keysToRemove as $key) {
-                unset($properties[$key]);
-            }
+        foreach ($keysToRemove as $key) {
+            unset($properties[$key]);
         }
 
         return array_values($properties);
@@ -42,37 +40,32 @@ class Processor
 
     /**
      * @param string $string
-     *
-     * @return string
      */
-    private function cleanup($string)
+    private function cleanup($string): string
     {
-        $string = str_replace(array("\r", "\n"), '', $string);
-        $string = str_replace(array("\t"), ' ', $string);
+        $string = str_replace(["\r", "\n"], '', $string);
+        $string = str_replace(["\t"], ' ', $string);
         $string = str_replace('"', '\'', $string);
         $string = preg_replace('|/\*.*?\*/|', '', $string) ?? $string;
         $string = preg_replace('/\s\s+/', ' ', $string) ?? $string;
 
         $string = trim($string);
-        $string = rtrim($string, ';');
 
-        return $string;
+        return rtrim($string, ';');
     }
 
     /**
      * Converts a property-string into an object
      *
      * @param string $property
-     *
-     * @return Property|null
      */
-    public function convertToObject($property, ?Specificity $specificity = null)
+    public function convertToObject($property, ?Specificity $specificity = null): ?\TijsVerkoyen\CssToInlineStyles\Css\Property\Property
     {
         if (strpos($property, ':') === false) {
             return null;
         }
 
-        list($name, $value) = explode(':', $property, 2);
+        [$name, $value] = explode(':', $property, 2);
 
         $name = trim($name);
         $value = trim($value);
@@ -91,9 +84,9 @@ class Processor
      *
      * @return Property[]
      */
-    public function convertArrayToObjects(array $properties, ?Specificity $specificity = null)
+    public function convertArrayToObjects(array $properties, ?Specificity $specificity = null): array
     {
-        $objects = array();
+        $objects = [];
 
         foreach ($properties as $property) {
             $object = $this->convertToObject($property, $specificity);
@@ -111,12 +104,10 @@ class Processor
      * Build the property-string for multiple properties
      *
      * @param Property[] $properties
-     *
-     * @return string
      */
-    public function buildPropertiesString(array $properties)
+    public function buildPropertiesString(array $properties): string
     {
-        $chunks = array();
+        $chunks = [];
 
         foreach ($properties as $property) {
             $chunks[] = $property->toString();

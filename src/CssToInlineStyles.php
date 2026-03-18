@@ -54,19 +54,17 @@ class CssToInlineStyles
     /**
      * Inline the given properties on a given DOMElement
      *
-     * @param \DOMElement             $element
      * @param Property[] $properties
      *
-     * @return \DOMElement
      */
-    public function inlineCssOnElement(\DOMElement $element, array $properties)
+    public function inlineCssOnElement(\DOMElement $element, array $properties): \DOMElement
     {
         if (empty($properties)) {
             return $element;
         }
 
-        $cssProperties = array();
-        $inlineProperties = array();
+        $cssProperties = [];
+        $inlineProperties = [];
 
         foreach ($this->getInlineStyles($element) as $property) {
             $inlineProperties[$property->getName()] = $property;
@@ -78,7 +76,7 @@ class CssToInlineStyles
             }
         }
 
-        $rules = array();
+        $rules = [];
         foreach (array_merge($cssProperties, $inlineProperties) as $property) {
             $rules[] = $property->toString();
         }
@@ -90,7 +88,6 @@ class CssToInlineStyles
     /**
      * Get the current inline styles for a given DOMElement
      *
-     * @param \DOMElement $element
      *
      * @return Property[]
      */
@@ -107,10 +104,8 @@ class CssToInlineStyles
 
     /**
      * @param string $html
-     *
-     * @return \DOMDocument
      */
-    protected function createDomDocumentFromHtml($html)
+    protected function createDomDocumentFromHtml($html): \DOMDocument
     {
         $document = new \DOMDocument('1.0', 'UTF-8');
         $internalErrors = libxml_use_internal_errors(true);
@@ -121,12 +116,7 @@ class CssToInlineStyles
         return $document;
     }
 
-    /**
-     * @param \DOMDocument $document
-     *
-     * @return string
-     */
-    protected function getHtmlFromDocument(\DOMDocument $document)
+    protected function getHtmlFromDocument(\DOMDocument $document): string
     {
         // retrieve the document element
         // we do it this way to preserve the utf-8 encoding
@@ -161,12 +151,10 @@ class CssToInlineStyles
     }
 
     /**
-     * @param \DOMDocument    $document
      * @param Css\Rule\Rule[] $rules
      *
-     * @return \DOMDocument
      */
-    protected function inline(\DOMDocument $document, array $rules)
+    protected function inline(\DOMDocument $document, array $rules): \DOMDocument
     {
         if (empty($rules)) {
             return $document;
@@ -177,7 +165,7 @@ class CssToInlineStyles
 
         $xPath = new \DOMXPath($document);
 
-        usort($rules, array(RuleProcessor::class, 'sortOnSpecificity'));
+        usort($rules, [RuleProcessor::class, 'sortOnSpecificity']);
 
         foreach ($rules as $rule) {
             try {
@@ -196,7 +184,7 @@ class CssToInlineStyles
                 \assert($element instanceof \DOMElement);
                 $propertyStorage[$element] = $this->calculatePropertiesToBeApplied(
                     $rule->getProperties(),
-                    $propertyStorage->offsetExists($element) ? $propertyStorage[$element] : array()
+                    $propertyStorage->offsetExists($element) ? $propertyStorage[$element] : []
                 );
             }
         }

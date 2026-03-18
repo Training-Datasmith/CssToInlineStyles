@@ -16,16 +16,12 @@ final class Property
      */
     private $value;
 
-    /**
-     * @var Specificity|null
-     */
-    private $originalSpecificity;
+    private ?\Symfony\Component\CssSelector\Node\Specificity $originalSpecificity;
 
     /**
      * Property constructor.
      * @param string           $name
      * @param string           $value
-     * @param Specificity|null $specificity
      */
     public function __construct($name, $value, ?Specificity $specificity = null)
     {
@@ -66,20 +62,16 @@ final class Property
 
     /**
      * Is this property important?
-     *
-     * @return bool
      */
-    public function isImportant()
+    public function isImportant(): bool
     {
         return (stripos($this->value, '!important') !== false);
     }
 
     /**
      * Get the textual representation of the property
-     *
-     * @return string
      */
-    public function toString()
+    public function toString(): string
     {
         return sprintf(
             '%1$s: %2$s;',
