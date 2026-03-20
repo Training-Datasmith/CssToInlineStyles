@@ -12,23 +12,32 @@ use Tijs_Verkoyen\Css_To_Inline_Styles\Css\Rule\Processor as RuleProcessor;
 class Css_To_Inline_Styles
 {
     /**
-     * @var CssSelectorConverter
+     * @var Css_Selector_Converter Symfony CSS-to-XPath converter used for selector matching
      */
     private $css_converter;
+
+    /**
+     * Initialises the converter with a Symfony CssSelectorConverter instance.
+     */
     public function __construct()
     {
         $this->css_converter = new Css_Selector_Converter();
     }
+
     /**
-     * Will inline the $css into the given $html
+     * Inlines all CSS rules into the HTML document's element style attributes.
      *
-     * Remark: if the html contains <style>-tags those will be used, the rules
-     * in $css will be appended.
+     * Extracts CSS from any `<style>` tags already present in the HTML, merges
+     * them with the optionally provided $css string, then applies each rule to
+     * matching elements as inline `style` attributes.  Specificity and
+     * `!important` are respected.
      *
-     * @param string $html
-     * @param string $css
+     * @param string      $html The HTML document or fragment to process.
+     * @param string|null $css  Additional CSS rules to apply on top of any embedded `<style>` blocks.
      *
-     * @return string
+     * @return string The processed HTML with all CSS inlined.
+     *
+     * @complexity O(r * e) where r = number of CSS rules and e = number of matched DOM elements
      */
     public function convert($html, $css = null)
     {
@@ -43,10 +52,15 @@ class Css_To_Inline_Styles
         return $this->get_html_from_document($document);
     }
     /**
-     * Inline the given properties on a given DOMElement
+     * Applies the given CSS properties to a single DOM element as an inline style attribute.
      *
-     * @param Property[] $properties
+     * Pre-existing inline styles take precedence — they are merged after the provided
+     * $properties so that author inline styles are never overwritten.
      *
+     * @param \Dom_Element $element    The DOM element to modify.
+     * @param Property[]   $properties The list of CSS properties to apply.
+     *
+     * @return \Dom_Element The same element with its `style` attribute updated.
      */
     public function inline_css_on_element(\Dom_Element $element, array $properties): \Dom_Element
     {
@@ -71,10 +85,14 @@ class Css_To_Inline_Styles
         return $element;
     }
     /**
-     * Get the current inline styles for a given DOMElement
+     * Returns the existing inline CSS properties already set on a DOM element.
      *
+     * Parses the element's current `style` attribute and returns each declaration
+     * as a typed {@see Property} object, preserving property names and values.
      *
-     * @return Property[]
+     * @param \Dom_Element $element The DOM element whose inline styles are to be read.
+     *
+     * @return Property[] Ordered list of Property objects parsed from the `style` attribute.
      */
     public function get_inline_styles(\Dom_Element $element)
     {
@@ -82,7 +100,15 @@ class Css_To_Inline_Styles
         return $processor->convert_array_to_objects($processor->split_into_separate_properties($element->get_attribute('style')));
     }
     /**
-     * @param string $html
+     * Parses an HTML string into a DOMDocument, handling non-ASCII characters safely.
+     *
+     * Uses `mb_encode_numericentity` to convert multibyte codepoints above 0x7F to
+     * numeric HTML entities before parsing, then re-enables the original libxml
+     * internal-error mode.
+     *
+     * @param string $html Raw HTML string to parse.
+     *
+     * @return \Dom_Document The parsed document with `formatOutput` enabled.
      */
     protected function create_dom_document_from_html($html): \Dom_Document
     {
@@ -93,6 +119,18 @@ class Css_To_Inline_Styles
         $document->format_output = true;
         return $document;
     }
+    /**
+     * Serialises a DOMDocument back to an HTML string, preserving the DOCTYPE.
+     *
+     * Handles the HTML5 `<!DOCTYPE html>` declaration by lower-casing it to match
+     * the HTML5 specification.
+     *
+     * @param \Dom_Document $document The document to serialise.
+     *
+     * @return string Full HTML string including doctype and root element.
+     *
+     * @throws \RuntimeException If the document element is missing or serialisation fails.
+     */
     protected function get_html_from_document(\Dom_Document $document): string
     {
         // retrieve the document element
