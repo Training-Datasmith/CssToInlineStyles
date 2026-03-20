@@ -1,12 +1,10 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Tijs_Verkoyen\Css_To_Inline_Styles\Css\Rule;
 
-namespace TijsVerkoyen\CssToInlineStyles\Css\Rule;
-
-use Symfony\Component\CssSelector\Node\Specificity;
-use TijsVerkoyen\CssToInlineStyles\Css\Property\Processor as PropertyProcessor;
-
+use Symfony\Component\Css_Selector\Node\Specificity;
+use Tijs_Verkoyen\Css_To_Inline_Styles\Css\Property\Processor as PropertyProcessor;
 class Processor
 {
     /**
@@ -16,13 +14,11 @@ class Processor
      *
      * @return string[]
      */
-    public function splitIntoSeparateRules($rulesString): array
+    public function split_into_separate_rules($rules_string): array
     {
-        $rulesString = $this->cleanup($rulesString);
-
-        return explode('}', $rulesString);
+        $rules_string = $this->cleanup($rules_string);
+        return explode('}', $rules_string);
     }
-
     /**
      * @param string $string
      */
@@ -33,12 +29,9 @@ class Processor
         $string = str_replace('"', '\'', $string);
         $string = preg_replace('|/\*.*?\*/|', '', $string) ?? $string;
         $string = preg_replace('/\s\s+/', ' ', $string) ?? $string;
-
         $string = trim($string);
-
         return rtrim($string, '}');
     }
-
     /**
      * Converts a rule-string into an object
      *
@@ -47,34 +40,24 @@ class Processor
      *
      * @return Rule[]
      */
-    public function convertToObjects($rule, $originalOrder): array
+    public function convert_to_objects($rule, $original_order): array
     {
         $rule = $this->cleanup($rule);
-
         $chunks = explode('{', $rule);
         if (!isset($chunks[1])) {
             return [];
         }
-        $propertiesProcessor = new PropertyProcessor();
+        $properties_processor = new Property_Processor();
         $rules = [];
         $selectors = explode(',', trim($chunks[0]));
-        $properties = $propertiesProcessor->splitIntoSeparateProperties($chunks[1]);
-
+        $properties = $properties_processor->split_into_separate_properties($chunks[1]);
         foreach ($selectors as $selector) {
             $selector = trim($selector);
-            $specificity = $this->calculateSpecificityBasedOnASelector($selector);
-
-            $rules[] = new Rule(
-                $selector,
-                $propertiesProcessor->convertArrayToObjects($properties, $specificity),
-                $specificity,
-                $originalOrder
-            );
+            $specificity = $this->calculate_specificity_based_on_a_selector($selector);
+            $rules[] = new Rule($selector, $properties_processor->convert_array_to_objects($properties, $specificity), $specificity, $original_order);
         }
-
         return $rules;
     }
-
     /**
      * Calculates the specificity based on a CSS Selector string,
      * Based on the patterns from premailer/css_parser by Alex Dunae
@@ -85,65 +68,33 @@ class Processor
      *
      * @return Specificity
      */
-    public function calculateSpecificityBasedOnASelector($selector)
+    public function calculate_specificity_based_on_a_selector($selector)
     {
-        $idSelectorCount = preg_match_all("/  \#/ix", $selector, $matches);
-        $classAttributesPseudoClassesSelectorsPattern = "  (\.[\w]+)                     # classes
-                        |
-                        \[(\w+)                       # attributes
-                        |
-                        (\:(                          # pseudo classes
-                          link|visited|active
-                          |hover|focus
-                          |lang
-                          |target
-                          |enabled|disabled|checked|indeterminate
-                          |root
-                          |nth-child|nth-last-child|nth-of-type|nth-last-of-type
-                          |first-child|last-child|first-of-type|last-of-type
-                          |only-child|only-of-type
-                          |empty|contains
-                        ))";
-        $classAttributesPseudoClassesSelectorCount = preg_match_all("/{$classAttributesPseudoClassesSelectorsPattern}/ix", $selector, $matches);
-
-        $typePseudoElementsSelectorPattern = "  ((^|[\s\+\>\~]+)[\w]+       # elements
-                        |
-                        \:{1,2}(                    # pseudo-elements
-                          after|before
-                          |first-letter|first-line
-                          |selection
-                        )
-                      )";
-        $typePseudoElementsSelectorCount = preg_match_all("/{$typePseudoElementsSelectorPattern}/ix", $selector, $matches);
-
-        if ($idSelectorCount === false || $classAttributesPseudoClassesSelectorCount === false || $typePseudoElementsSelectorCount === false) {
+        $id_selector_count = preg_match_all("/  \\#/ix", $selector, $matches);
+        $class_attributes_pseudo_classes_selectors_pattern = "  (\\.[\\w]+)                     # classes\n                        |\n                        \\[(\\w+)                       # attributes\n                        |\n                        (\\:(                          # pseudo classes\n                          link|visited|active\n                          |hover|focus\n                          |lang\n                          |target\n                          |enabled|disabled|checked|indeterminate\n                          |root\n                          |nth-child|nth-last-child|nth-of-type|nth-last-of-type\n                          |first-child|last-child|first-of-type|last-of-type\n                          |only-child|only-of-type\n                          |empty|contains\n                        ))";
+        $class_attributes_pseudo_classes_selector_count = preg_match_all("/{$class_attributes_pseudo_classes_selectors_pattern}/ix", $selector, $matches);
+        $type_pseudo_elements_selector_pattern = "  ((^|[\\s\\+\\>\\~]+)[\\w]+       # elements\n                        |\n                        \\:{1,2}(                    # pseudo-elements\n                          after|before\n                          |first-letter|first-line\n                          |selection\n                        )\n                      )";
+        $type_pseudo_elements_selector_count = preg_match_all("/{$type_pseudo_elements_selector_pattern}/ix", $selector, $matches);
+        if ($id_selector_count === false || $class_attributes_pseudo_classes_selector_count === false || $type_pseudo_elements_selector_count === false) {
             throw new \RuntimeException('Failed to calculate specificity based on selector.');
         }
-
-        return new Specificity(
-            $idSelectorCount,
-            $classAttributesPseudoClassesSelectorCount,
-            $typePseudoElementsSelectorCount
-        );
+        return new Specificity($id_selector_count, $class_attributes_pseudo_classes_selector_count, $type_pseudo_elements_selector_count);
     }
-
     /**
      * @param string[] $rules
      * @param Rule[]   $objects
      *
      * @return Rule[]
      */
-    public function convertArrayToObjects(array $rules, array $objects = [])
+    public function convert_array_to_objects(array $rules, array $objects = [])
     {
         $order = 1;
         foreach ($rules as $rule) {
-            $objects = array_merge($objects, $this->convertToObjects($rule, $order));
+            $objects = array_merge($objects, $this->convert_to_objects($rule, $order));
             $order++;
         }
-
         return $objects;
     }
-
     /**
      * Sorts an array on the specificity element in an ascending way
      * Lower specificity will be sorted to the beginning of the array
@@ -153,16 +104,14 @@ class Processor
      *
      * @return int
      */
-    public static function sortOnSpecificity(Rule $e1, Rule $e2)
+    public static function sort_on_specificity(Rule $e1, Rule $e2)
     {
-        $e1Specificity = $e1->getSpecificity();
-        $value = $e1Specificity->compareTo($e2->getSpecificity());
-
+        $e1Specificity = $e1->get_specificity();
+        $value = $e1Specificity->compare_to($e2->get_specificity());
         // if the specificity is the same, use the order in which the element appeared
         if ($value === 0) {
-            return $e1->getOrder() - $e2->getOrder();
+            return $e1->get_order() - $e2->get_order();
         }
-
         return $value;
     }
 }

@@ -1,28 +1,24 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Tijs_Verkoyen\Css_To_Inline_Styles;
 
-namespace TijsVerkoyen\CssToInlineStyles;
-
-use Symfony\Component\CssSelector\CssSelectorConverter;
-use Symfony\Component\CssSelector\Exception\ExceptionInterface;
-use TijsVerkoyen\CssToInlineStyles\Css\Processor;
-use TijsVerkoyen\CssToInlineStyles\Css\Property\Processor as PropertyProcessor;
-use TijsVerkoyen\CssToInlineStyles\Css\Property\Property;
-use TijsVerkoyen\CssToInlineStyles\Css\Rule\Processor as RuleProcessor;
-
-class CssToInlineStyles
+use Symfony\Component\Css_Selector\Css_Selector_Converter;
+use Symfony\Component\Css_Selector\Exception\Exception_Interface;
+use Tijs_Verkoyen\Css_To_Inline_Styles\Css\Processor;
+use Tijs_Verkoyen\Css_To_Inline_Styles\Css\Property\Processor as PropertyProcessor;
+use Tijs_Verkoyen\Css_To_Inline_Styles\Css\Property\Property;
+use Tijs_Verkoyen\Css_To_Inline_Styles\Css\Rule\Processor as RuleProcessor;
+class Css_To_Inline_Styles
 {
     /**
      * @var CssSelectorConverter
      */
-    private $cssConverter;
-
+    private $css_converter;
     public function __construct()
     {
-        $this->cssConverter = new CssSelectorConverter();
+        $this->css_converter = new Css_Selector_Converter();
     }
-
     /**
      * Will inline the $css into the given $html
      *
@@ -36,168 +32,126 @@ class CssToInlineStyles
      */
     public function convert($html, $css = null)
     {
-        $document = $this->createDomDocumentFromHtml($html);
+        $document = $this->create_dom_document_from_html($html);
         $processor = new Processor();
-
         // get all styles from the style-tags
-        $rules = $processor->getRules(
-            $processor->getCssFromStyleTags($html)
-        );
-
+        $rules = $processor->get_rules($processor->get_css_from_style_tags($html));
         if ($css !== null) {
-            $rules = $processor->getRules($css, $rules);
+            $rules = $processor->get_rules($css, $rules);
         }
-
         $document = $this->inline($document, $rules);
-
-        return $this->getHtmlFromDocument($document);
+        return $this->get_html_from_document($document);
     }
-
     /**
      * Inline the given properties on a given DOMElement
      *
      * @param Property[] $properties
      *
      */
-    public function inlineCssOnElement(\DOMElement $element, array $properties): \DOMElement
+    public function inline_css_on_element(\Dom_Element $element, array $properties): \Dom_Element
     {
         if (empty($properties)) {
             return $element;
         }
-
-        $cssProperties = [];
-        $inlineProperties = [];
-
-        foreach ($this->getInlineStyles($element) as $property) {
-            $inlineProperties[$property->getName()] = $property;
+        $css_properties = [];
+        $inline_properties = [];
+        foreach ($this->get_inline_styles($element) as $property) {
+            $inline_properties[$property->get_name()] = $property;
         }
-
         foreach ($properties as $property) {
-            if (!isset($inlineProperties[$property->getName()])) {
-                $cssProperties[$property->getName()] = $property;
+            if (!isset($inline_properties[$property->get_name()])) {
+                $css_properties[$property->get_name()] = $property;
             }
         }
-
         $rules = [];
-        foreach (array_merge($cssProperties, $inlineProperties) as $property) {
-            $rules[] = $property->toString();
+        foreach (array_merge($css_properties, $inline_properties) as $property) {
+            $rules[] = $property->to_string();
         }
-        $element->setAttribute('style', implode(' ', $rules));
-
+        $element->set_attribute('style', implode(' ', $rules));
         return $element;
     }
-
     /**
      * Get the current inline styles for a given DOMElement
      *
      *
      * @return Property[]
      */
-    public function getInlineStyles(\DOMElement $element)
+    public function get_inline_styles(\Dom_Element $element)
     {
-        $processor = new PropertyProcessor();
-
-        return $processor->convertArrayToObjects(
-            $processor->splitIntoSeparateProperties(
-                $element->getAttribute('style')
-            )
-        );
+        $processor = new Property_Processor();
+        return $processor->convert_array_to_objects($processor->split_into_separate_properties($element->get_attribute('style')));
     }
-
     /**
      * @param string $html
      */
-    protected function createDomDocumentFromHtml($html): \DOMDocument
+    protected function create_dom_document_from_html($html): \Dom_Document
     {
-        $document = new \DOMDocument('1.0', 'UTF-8');
-        $internalErrors = libxml_use_internal_errors(true);
-        $document->loadHTML(mb_encode_numericentity($html, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8'));
-        libxml_use_internal_errors($internalErrors);
-        $document->formatOutput = true;
-
+        $document = new \Dom_Document('1.0', 'UTF-8');
+        $internal_errors = libxml_use_internal_errors(true);
+        $document->load_html(mb_encode_numericentity($html, [0x80, 0x10ffff, 0, 0x1fffff], 'UTF-8'));
+        libxml_use_internal_errors($internal_errors);
+        $document->format_output = true;
         return $document;
     }
-
-    protected function getHtmlFromDocument(\DOMDocument $document): string
+    protected function get_html_from_document(\Dom_Document $document): string
     {
         // retrieve the document element
         // we do it this way to preserve the utf-8 encoding
-        $htmlElement = $document->documentElement;
-
-        if ($htmlElement === null) {
+        $html_element = $document->document_element;
+        if ($html_element === null) {
             throw new \RuntimeException('Failed to get HTML from empty document.');
         }
-
-        $html = $document->saveHTML($htmlElement);
-
+        $html = $document->save_html($html_element);
         if ($html === false) {
             throw new \RuntimeException('Failed to get HTML from document.');
         }
-
         $html = trim($html);
-
         // retrieve the doctype
-        $document->removeChild($htmlElement);
-        $doctype = $document->saveHTML();
+        $document->remove_child($html_element);
+        $doctype = $document->save_html();
         if ($doctype === false) {
             $doctype = '';
         }
         $doctype = trim($doctype);
-
         // if it is the html5 doctype convert it to lowercase
         if ($doctype === '<!DOCTYPE html>') {
             $doctype = strtolower($doctype);
         }
-
-        return $doctype."\n".$html;
+        return $doctype . "\n" . $html;
     }
-
     /**
      * @param Css\Rule\Rule[] $rules
      *
      */
-    protected function inline(\DOMDocument $document, array $rules): \DOMDocument
+    protected function inline(\Dom_Document $document, array $rules): \Dom_Document
     {
         if (empty($rules)) {
             return $document;
         }
-
         /** @var \SplObjectStorage<\DOMElement, array<string, Property>> $propertyStorage */
-        $propertyStorage = new \SplObjectStorage();
-
-        $xPath = new \DOMXPath($document);
-
-        usort($rules, [RuleProcessor::class, 'sortOnSpecificity']);
-
+        $property_storage = new \Spl_Object_Storage();
+        $x_path = new \Domx_Path($document);
+        usort($rules, [Rule_Processor::class, 'sortOnSpecificity']);
         foreach ($rules as $rule) {
             try {
-                $expression = $this->cssConverter->toXPath($rule->getSelector());
-            } catch (ExceptionInterface $e) {
+                $expression = $this->css_converter->to_x_path($rule->get_selector());
+            } catch (Exception_Interface $e) {
                 continue;
             }
-
-            $elements = $xPath->query($expression);
-
+            $elements = $x_path->query($expression);
             if ($elements === false) {
                 continue;
             }
-
             foreach ($elements as $element) {
-                \assert($element instanceof \DOMElement);
-                $propertyStorage[$element] = $this->calculatePropertiesToBeApplied(
-                    $rule->getProperties(),
-                    $propertyStorage->offsetExists($element) ? $propertyStorage[$element] : []
-                );
+                \assert($element instanceof \Dom_Element);
+                $property_storage[$element] = $this->calculate_properties_to_be_applied($rule->get_properties(), $property_storage->offsetExists($element) ? $property_storage[$element] : []);
             }
         }
-
-        foreach ($propertyStorage as $element) {
-            $this->inlineCssOnElement($element, $propertyStorage[$element]);
+        foreach ($property_storage as $element) {
+            $this->inline_css_on_element($element, $property_storage[$element]);
         }
-
         return $document;
     }
-
     /**
      * Merge the CSS rules to determine the applied properties.
      *
@@ -206,38 +160,33 @@ class CssToInlineStyles
      *
      * @return array<string, Property> updated properties, indexed by name
      */
-    private function calculatePropertiesToBeApplied(array $properties, array $cssProperties): array
+    private function calculate_properties_to_be_applied(array $properties, array $css_properties): array
     {
         if (empty($properties)) {
-            return $cssProperties;
+            return $css_properties;
         }
-
         foreach ($properties as $property) {
-            if (isset($cssProperties[$property->getName()])) {
-                $existingProperty = $cssProperties[$property->getName()];
-
+            if (isset($css_properties[$property->get_name()])) {
+                $existing_property = $css_properties[$property->get_name()];
                 //skip check to overrule if existing property is important and current is not
-                if ($existingProperty->isImportant() && !$property->isImportant()) {
+                if ($existing_property->is_important() && !$property->is_important()) {
                     continue;
                 }
-
                 //overrule if current property is important and existing is not, else check specificity
-                $overrule = !$existingProperty->isImportant() && $property->isImportant();
+                $overrule = !$existing_property->is_important() && $property->is_important();
                 if (!$overrule) {
-                    \assert($existingProperty->getOriginalSpecificity() !== null, 'Properties created for parsed CSS always have their associated specificity.');
-                    \assert($property->getOriginalSpecificity() !== null, 'Properties created for parsed CSS always have their associated specificity.');
-                    $overrule = $existingProperty->getOriginalSpecificity()->compareTo($property->getOriginalSpecificity()) <= 0;
+                    \assert($existing_property->get_original_specificity() !== null, 'Properties created for parsed CSS always have their associated specificity.');
+                    \assert($property->get_original_specificity() !== null, 'Properties created for parsed CSS always have their associated specificity.');
+                    $overrule = $existing_property->get_original_specificity()->compare_to($property->get_original_specificity()) <= 0;
                 }
-
                 if ($overrule) {
-                    unset($cssProperties[$property->getName()]);
-                    $cssProperties[$property->getName()] = $property;
+                    unset($css_properties[$property->get_name()]);
+                    $css_properties[$property->get_name()] = $property;
                 }
             } else {
-                $cssProperties[$property->getName()] = $property;
+                $css_properties[$property->get_name()] = $property;
             }
         }
-
-        return $cssProperties;
+        return $css_properties;
     }
 }

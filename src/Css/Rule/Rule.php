@@ -1,34 +1,28 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types=1);
+namespace Tijs_Verkoyen\Css_To_Inline_Styles\Css\Rule;
 
-namespace TijsVerkoyen\CssToInlineStyles\Css\Rule;
-
-use Symfony\Component\CssSelector\Node\Specificity;
-use TijsVerkoyen\CssToInlineStyles\Css\Property\Property;
-
+use Symfony\Component\Css_Selector\Node\Specificity;
+use Tijs_Verkoyen\Css_To_Inline_Styles\Css\Property\Property;
 final class Rule
 {
     /**
      * @var string
      */
     private $selector;
-
     /**
      * @var Property[]
      */
     private array $properties;
-
     /**
      * @var Specificity
      */
     private $specificity;
-
     /**
      * @var integer
      */
     private $order;
-
     /**
      * Rule constructor.
      *
@@ -43,43 +37,39 @@ final class Rule
         $this->specificity = $specificity;
         $this->order = $order;
     }
-
     /**
      * Get selector
      *
      * @return string
      */
-    public function getSelector()
+    public function get_selector()
     {
         return $this->selector;
     }
-
     /**
      * Get properties
      *
      * @return Property[]
      */
-    public function getProperties()
+    public function get_properties()
     {
         return $this->properties;
     }
-
     /**
      * Get specificity
      *
      * @return Specificity
      */
-    public function getSpecificity()
+    public function get_specificity()
     {
         return $this->specificity;
     }
-
     /**
      * Get order
      *
      * @return int
      */
-    public function getOrder()
+    public function get_order()
     {
         return $this->order;
     }
